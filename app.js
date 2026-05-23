@@ -1,6 +1,6 @@
 // app.js
 // ========== CONFIGURATION ==========
-const ADMIN_PASSWORD = "admin123";  // Change this to your own password!
+const ADMIN_PASSWORD = "nandigawaya25";  // Change this to your own password!
 let isAdmin = false;
 let allMods = [];
 let currentPage = 1;

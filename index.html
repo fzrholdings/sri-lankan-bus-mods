@@ -41,6 +41,21 @@
             cursor: default;
         }
 
+        .sync-status {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #2ecc71;
+        }
+
+        .sync-status.syncing {
+            color: #f39c12;
+        }
+
+        .sync-status.error {
+            color: #e74c3c;
+        }
+
         .admin-panel {
             background: #0a0a0a;
             border-radius: 24px;
@@ -308,6 +323,12 @@
             color: #aaa;
         }
 
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+            color: #2ecc71;
+        }
+
         @media (max-width: 640px) {
             body { padding: 1rem; }
             h1 { font-size: 1.6rem; }
@@ -318,6 +339,7 @@
 <div class="container">
     <header>
         <h1 id="mainTitle">🇱🇰 Sri Lankan Bus Mods</h1>
+        <div id="syncStatus" class="sync-status">🔄 Loading mods from GitHub...</div>
     </header>
 
     <div id="adminPanel" class="admin-panel" style="display: none;">
@@ -334,6 +356,9 @@
             <textarea id="modDescription" placeholder="Description..." rows="3"></textarea>
             <button type="submit">➕ Add Mod</button>
         </form>
+        <div style="margin-top: 1rem; font-size: 0.75rem; color: #666; text-align: center;">
+            ⚡ Mods are saved locally. To sync across devices, update mods.json in GitHub.
+        </div>
     </div>
 
     <div class="search-wrapper">
@@ -343,7 +368,9 @@
         <input type="text" id="searchInput" class="search-input" placeholder="Search bus mods...">
     </div>
 
-    <div id="modsContainer" class="mod-grid"></div>
+    <div id="modsContainer" class="mod-grid">
+        <div class="loading-spinner">🔄 Loading mods...</div>
+    </div>
 
     <div class="pagination">
         <button id="prevPageBtn">◀ Previous</button>
@@ -368,26 +395,10 @@
     </div>
 </div>
 
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3 style="color:#ffcc00">✏️ Edit Bus Mod</h3>
-        <form id="editModForm" style="display:flex; flex-direction:column; gap:12px; margin-top:1rem;">
-            <input type="hidden" id="editModId">
-            <input type="text" id="editModName" placeholder="Mod Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="text" id="editModVersion" placeholder="Game Version" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="text" id="editModAuthor" placeholder="Author Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="url" id="editModImage" placeholder="Image URL" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="url" id="editModDownload" placeholder="Download URL" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <textarea id="editModDescription" placeholder="Description..." rows="3" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;"></textarea>
-            <button type="submit" style="background:#fff; color:#000; padding:12px; border-radius:40px; font-weight:700; cursor:pointer;">💾 Save Changes</button>
-        </form>
-    </div>
-</div>
-
 <script>
 // ============================================
-// VERSION WITH DATA MIGRATION - YOUR OLD MODS WILL BE PRESERVED!
+// SRILANKAN BUS MODS - GitHub Version
+// Loads from: https://github.com/fzrholdings/sri-lankan-bus-mods
 // ============================================
 
 const ADMIN_PASSWORD = "nandigawaya25";
@@ -397,9 +408,10 @@ let currentPage = 1;
 const modsPerPage = 24;
 let filteredMods = [];
 
-// OLD and NEW storage keys - BOTH will be checked!
+// Your GitHub repo details
+const GITHUB_RAW_URL = "https://raw.githubusercontent.com/fzrholdings/sri-lankan-bus-mods/main/mods.json";
+const LOCAL_BACKUP_KEY = "sl_bus_mods_backup";
 const OLD_STORAGE_KEY = "sri_lankan_bus_mods";
-const NEW_STORAGE_KEY = "sl_bus_mods_data";
 
 // DOM Elements
 const modsContainer = document.getElementById('modsContainer');
@@ -414,8 +426,7 @@ const adminPassword = document.getElementById('adminPassword');
 const logoutBtn = document.getElementById('logoutBtn');
 const addModForm = document.getElementById('addModForm');
 const mainTitle = document.getElementById('mainTitle');
-const editModal = document.getElementById('editModal');
-const editModForm = document.getElementById('editModForm');
+const syncStatus = document.getElementById('syncStatus');
 
 function escapeHtml(str) {
     if (!str) return '';
@@ -427,28 +438,28 @@ function escapeHtml(str) {
     });
 }
 
-// ========== IMPORTANT: Migrate old data to new key ==========
+function setSyncStatus(message, isError = false) {
+    syncStatus.textContent = message;
+    syncStatus.className = 'sync-status';
+    if (isError) {
+        syncStatus.classList.add('error');
+    } else if (message.includes('Loading') || message.includes('Syncing')) {
+        syncStatus.classList.add('syncing');
+    }
+}
+
+// ========== MIGRATE OLD DATA FROM PREVIOUS VERSION ==========
 function migrateOldData() {
     try {
-        // Check if old storage has data
         const oldData = localStorage.getItem(OLD_STORAGE_KEY);
-        const newData = localStorage.getItem(NEW_STORAGE_KEY);
-        
-        // If old data exists and new data doesn't, migrate!
-        if (oldData && oldData !== 'undefined' && (!newData || newData === 'undefined')) {
+        if (oldData && oldData !== 'undefined') {
             const oldMods = JSON.parse(oldData);
             if (oldMods && oldMods.length > 0) {
-                localStorage.setItem(NEW_STORAGE_KEY, JSON.stringify(oldMods));
-                console.log(`✅ Migrated ${oldMods.length} mods from old storage to new storage!`);
+                localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(oldMods));
+                console.log(`✅ Migrated ${oldMods.length} mods from old storage!`);
                 return oldMods;
             }
         }
-        
-        // If new data exists, use that
-        if (newData && newData !== 'undefined') {
-            return JSON.parse(newData);
-        }
-        
         return null;
     } catch(e) {
         console.log("Migration error:", e);
@@ -456,69 +467,94 @@ function migrateOldData() {
     }
 }
 
-function loadModsFromStorage() {
-    try {
-        // Try to migrate old data first
-        let mods = migrateOldData();
-        
-        if (mods && mods.length > 0) {
-            allMods = mods;
-            saveModsToStorage(); // Save to new key
-        } else {
-            // Check new storage directly
-            const stored = localStorage.getItem(NEW_STORAGE_KEY);
-            if (stored && stored !== 'undefined') {
-                allMods = JSON.parse(stored);
-            } else {
-                // Default sample mods
-                allMods = [
-                    {
-                        id: "1",
-                        name: "SLTB Leyland Bus",
-                        version: "1.59",
-                        author: "LK Modder",
-                        imageUrl: "https://via.placeholder.com/300x150?text=SLTB+Bus",
-                        downloadUrl: "#",
-                        description: "Classic Sri Lankan transport bus mod for ETS2.",
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-                        id: "2",
-                        name: "Ashok Leyland Samara",
-                        version: "1.59",
-                        author: "Colombo Mods",
-                        imageUrl: "https://via.placeholder.com/300x150?text=Ashok+Leyland",
-                        downloadUrl: "#",
-                        description: "Popular intercity bus model from Sri Lanka.",
-                        timestamp: new Date().toISOString()
-                    }
-                ];
-                saveModsToStorage();
-            }
-        }
-    } catch(e) {
-        console.log("Storage error, using defaults");
-        allMods = [
-            { id: "1", name: "Sample Bus Mod", version: "1.59", author: "Modder", imageUrl: "", downloadUrl: "#", description: "Sample mod", timestamp: new Date().toISOString() }
-        ];
-    }
+// ========== LOAD MODS FROM GITHUB ==========
+async function loadModsFromGitHub() {
+    setSyncStatus("🔄 Loading mods from GitHub...");
+    modsContainer.innerHTML = '<div class="loading-spinner">🔄 Loading mods from GitHub...</div>';
     
-    // Show how many mods loaded
-    console.log(`📦 Loaded ${allMods.length} mods from storage`);
-    applyFilters();
-}
-
-function saveModsToStorage() {
     try {
-        localStorage.setItem(NEW_STORAGE_KEY, JSON.stringify(allMods));
-    } catch(e) {
-        console.log("Could not save to localStorage");
+        // Try to load from GitHub raw URL
+        const response = await fetch(GITHUB_RAW_URL, {
+            cache: 'no-cache',
+            headers: { 'Cache-Control': 'no-cache' }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data && data.mods && Array.isArray(data.mods)) {
+                allMods = data.mods;
+                localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
+                setSyncStatus(`✅ Loaded ${allMods.length} mods from GitHub repo`);
+                console.log("✅ Loaded from GitHub:", allMods.length, "mods");
+                applyFilters();
+                return;
+            } else {
+                throw new Error("Invalid mods.json format");
+            }
+        } else {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (error) {
+        console.error("GitHub load error:", error);
+        
+        // Try to migrate old data first
+        const migratedMods = migrateOldData();
+        if (migratedMods) {
+            allMods = migratedMods;
+            setSyncStatus(`📦 Migrated ${allMods.length} mods from previous version`, true);
+            applyFilters();
+            return;
+        }
+        
+        // Try local backup
+        const backup = localStorage.getItem(LOCAL_BACKUP_KEY);
+        if (backup && backup !== 'undefined') {
+            allMods = JSON.parse(backup);
+            setSyncStatus(`📱 Using local backup (${allMods.length} mods)`, true);
+            applyFilters();
+            return;
+        }
+        
+        // Default sample mods
+        allMods = [
+            {
+                id: "1",
+                name: "SLTB Leyland Bus",
+                version: "1.59",
+                author: "LK Modder",
+                imageUrl: "https://via.placeholder.com/300x150?text=SLTB+Bus",
+                downloadUrl: "#",
+                description: "Classic Sri Lankan transport bus mod for ETS2.",
+                timestamp: new Date().toISOString()
+            },
+            {
+                id: "2",
+                name: "Ashok Leyland Samara",
+                version: "1.59",
+                author: "Colombo Mods",
+                imageUrl: "https://via.placeholder.com/300x150?text=Ashok+Leyland",
+                downloadUrl: "#",
+                description: "Popular intercity bus model from Sri Lanka.",
+                timestamp: new Date().toISOString()
+            }
+        ];
+        localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
+        setSyncStatus("📦 Using default mods", true);
+        applyFilters();
     }
 }
 
+// ========== SAVE MODS TO LOCAL (no GitHub write) ==========
+function saveModsToLocal() {
+    localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
+    setSyncStatus(`💾 Saved ${allMods.length} mods to local backup`);
+}
+
+// ========== ADMIN FUNCTIONS ==========
 function checkAdminStatus() {
     try {
-        const adminStatus = sessionStorage.getItem('bus_mods_admin_embed');
+        const adminStatus = sessionStorage.getItem('bus_mods_admin');
         if (adminStatus === 'true') {
             isAdmin = true;
             adminPanel.style.display = 'block';
@@ -543,14 +579,14 @@ function showAdminLoginModal() {
 function login(password) {
     if (password === ADMIN_PASSWORD) {
         try {
-            sessionStorage.setItem('bus_mods_admin_embed', 'true');
+            sessionStorage.setItem('bus_mods_admin', 'true');
         } catch(e) {}
         isAdmin = true;
         adminPanel.style.display = 'block';
         loginModal.style.display = 'none';
         adminPassword.value = '';
         renderCurrentPage();
-        alert('✅ Login successful! Admin panel activated.');
+        alert('✅ Login successful!');
     } else {
         alert('❌ Wrong password!');
     }
@@ -558,7 +594,7 @@ function login(password) {
 
 function logout() {
     try {
-        sessionStorage.removeItem('bus_mods_admin_embed');
+        sessionStorage.removeItem('bus_mods_admin');
     } catch(e) {}
     isAdmin = false;
     adminPanel.style.display = 'none';
@@ -574,9 +610,9 @@ function addMod(mod) {
     mod.id = Date.now().toString();
     mod.timestamp = new Date().toISOString();
     allMods.unshift(mod);
-    saveModsToStorage();
+    saveModsToLocal();
     applyFilters();
-    alert('✅ Mod added successfully!');
+    alert('✅ Mod added to local storage!');
     return true;
 }
 
@@ -598,9 +634,9 @@ function updateMod(updatedMod) {
     if (index !== -1) {
         updatedMod.timestamp = new Date().toISOString();
         allMods[index] = { ...allMods[index], ...updatedMod };
-        saveModsToStorage();
+        saveModsToLocal();
         applyFilters();
-        alert('✅ Mod updated successfully!');
+        alert('✅ Mod updated locally!');
         return true;
     }
     return false;
@@ -609,7 +645,7 @@ function updateMod(updatedMod) {
 function deleteMod(modId) {
     if (confirm('Are you sure you want to delete this mod?')) {
         allMods = allMods.filter(mod => mod.id !== modId);
-        saveModsToStorage();
+        saveModsToLocal();
         applyFilters();
         alert('🗑️ Mod deleted!');
     }
@@ -670,7 +706,7 @@ function renderCurrentPage() {
         modsContainer.appendChild(card);
     });
 
-    // Events
+    // Attach events
     document.querySelectorAll('.mod-card').forEach(card => {
         card.addEventListener('click', (e) => {
             if (e.target.classList.contains('download-btn') || e.target.classList.contains('edit-btn') || e.target.classList.contains('delete-btn')) return;
@@ -737,6 +773,46 @@ function closeModals() {
     if (edit) edit.style.display = 'none';
 }
 
+// Create Edit Modal dynamically
+const editModal = document.createElement('div');
+editModal.id = 'editModal';
+editModal.className = 'modal';
+editModal.innerHTML = `
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3 style="color:#ffcc00">✏️ Edit Bus Mod</h3>
+        <form id="editModForm" style="display:flex; flex-direction:column; gap:12px; margin-top:1rem;">
+            <input type="hidden" id="editModId">
+            <input type="text" id="editModName" placeholder="Mod Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
+            <input type="text" id="editModVersion" placeholder="Game Version" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
+            <input type="text" id="editModAuthor" placeholder="Author Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
+            <input type="url" id="editModImage" placeholder="Image URL" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
+            <input type="url" id="editModDownload" placeholder="Download URL" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
+            <textarea id="editModDescription" placeholder="Description..." rows="3" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;"></textarea>
+            <button type="submit" style="background:#fff; color:#000; padding:12px; border-radius:40px; font-weight:700; cursor:pointer;">💾 Save Changes</button>
+        </form>
+    </div>
+`;
+document.body.appendChild(editModal);
+
+// Edit form event
+const editModFormElem = document.getElementById('editModForm');
+if (editModFormElem) {
+    editModFormElem.addEventListener('submit', (e) => {
+        e.preventDefault();
+        updateMod({
+            id: document.getElementById('editModId').value,
+            name: document.getElementById('editModName').value.trim(),
+            version: document.getElementById('editModVersion').value.trim(),
+            author: document.getElementById('editModAuthor').value.trim(),
+            imageUrl: document.getElementById('editModImage').value.trim(),
+            downloadUrl: document.getElementById('editModDownload').value.trim(),
+            description: document.getElementById('editModDescription').value.trim()
+        });
+        editModal.style.display = 'none';
+    });
+}
+
 // Event Listeners
 searchInput.addEventListener('input', applyFilters);
 prevBtn.addEventListener('click', prevPage);
@@ -745,6 +821,7 @@ mainTitle.addEventListener('dblclick', () => showAdminLoginModal());
 loginSubmitBtn.addEventListener('click', () => login(adminPassword.value));
 adminPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(adminPassword.value); });
 logoutBtn.addEventListener('click', logout);
+
 addModForm.addEventListener('submit', (e) => {
     e.preventDefault();
     addMod({
@@ -757,28 +834,20 @@ addModForm.addEventListener('submit', (e) => {
     });
     addModForm.reset();
 });
-editModForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    updateMod({
-        id: document.getElementById('editModId').value,
-        name: document.getElementById('editModName').value.trim(),
-        version: document.getElementById('editModVersion').value.trim(),
-        author: document.getElementById('editModAuthor').value.trim(),
-        imageUrl: document.getElementById('editModImage').value.trim(),
-        downloadUrl: document.getElementById('editModDownload').value.trim(),
-        description: document.getElementById('editModDescription').value.trim()
-    });
-    editModal.style.display = 'none';
+
+// Close modals
+document.querySelectorAll('.close-btn').forEach(btn => {
+    btn.addEventListener('click', closeModals);
 });
-document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', closeModals));
-window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModals(); });
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) closeModals();
+});
 
 // Initialize
-loadModsFromStorage();
+loadModsFromGitHub();
 checkAdminStatus();
 
-console.log("✅ Site loaded with DATA MIGRATION - Your old mods are safe!");
-console.log(`📊 Total mods in database: ${allMods.length}`);
+console.log("✅ Site loaded! Mods from: https://github.com/fzrholdings/sri-lankan-bus-mods");
 </script>
 </body>
 </html>

@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sri Lankan Bus Mods - GitHub Direct</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sri Lankan Bus Mods | ETS2 Bus Mods Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Lato', sans-serif !important; }
         body { background: #000000; color: #ffffff; line-height: 1.5; padding: 2rem 1rem; }
         .container { max-width: 1300px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 2rem; }
-        h1 { font-size: 2.2rem; font-weight: 700; border-bottom: 1px solid #2a2a2a; display: inline-block; padding-bottom: 0.5rem; }
+        h1 { font-size: 2.2rem; font-weight: 700; border-bottom: 1px solid #2a2a2a; display: inline-block; padding-bottom: 0.5rem; cursor: default; }
         .status { text-align: center; margin-top: 0.5rem; font-size: 0.8rem; padding: 8px; border-radius: 8px; }
         .status.success { background: #1a3a1a; color: #2ecc71; }
         .status.error { background: #3a1a1a; color: #e74c3c; }
@@ -73,11 +73,19 @@
 
 <script>
     // ============================================
-    // DIRECT GITHUB JSON READER - NO LOCAL STORAGE
+    // CORS-PROXY SOLUTION - Loads GitHub JSON via CORS proxy
     // ============================================
     
     // Your GitHub raw JSON URL
-    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/fzrholdings/sri-lankan-bus-mods/main/mods.json";
+    const GITHUB_RAW_URL = "https://raw.githubusercontent.com/fzrholdings/sri-lankan-bus-mods/main/mods.json";
+    
+    // Free CORS proxies (try multiple)
+    const CORS_PROXIES = [
+        "https://api.allorigins.win/raw?url=",
+        "https://corsproxy.io/?",
+        "https://cors-anywhere.herokuapp.com/",
+        "https://proxy.cors.sh/"
+    ];
     
     let allMods = [];
     let filteredMods = [];
@@ -105,61 +113,105 @@
     function setStatus(message, type = 'loading') {
         statusDiv.textContent = message;
         statusDiv.className = `status ${type}`;
+        console.log(`[${type}] ${message}`);
     }
     
-    // Load mods directly from GitHub
-    async function loadModsFromGitHub() {
-        setStatus("🔄 Fetching mods from GitHub...", "loading");
-        modsContainer.innerHTML = '<div class="loading-spinner">🔄 Loading mods from GitHub...</div>';
+    // Try to fetch with CORS proxy
+    async function fetchWithCORS(url, proxyIndex = 0) {
+        if (proxyIndex >= CORS_PROXIES.length) {
+            throw new Error("All CORS proxies failed");
+        }
+        
+        const proxy = CORS_PROXIES[proxyIndex];
+        const proxyUrl = proxy + encodeURIComponent(url);
+        
+        console.log(`Trying proxy ${proxyIndex + 1}: ${proxy}`);
         
         try {
-            const response = await fetch(GITHUB_JSON_URL, {
-                cache: 'no-store',  // Don't cache
+            const response = await fetch(proxyUrl, {
+                cache: 'no-store',
                 headers: {
                     'Cache-Control': 'no-cache'
                 }
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`HTTP ${response.status}`);
             }
             
             const data = await response.json();
-            console.log("GitHub Response:", data);
-            
-            // Check if data has mods array
-            if (data && data.mods && Array.isArray(data.mods)) {
-                allMods = data.mods;
-                const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
-                setStatus(`✅ Loaded ${allMods.length} mods from GitHub | Last updated: ${lastUpdated}`, "success");
-                console.log(`✅ Successfully loaded ${allMods.length} mods`);
-            } else if (Array.isArray(data)) {
-                // If JSON is just an array
-                allMods = data;
-                setStatus(`✅ Loaded ${allMods.length} mods from GitHub`, "success");
-            } else {
-                throw new Error("Invalid JSON format - expected 'mods' array");
+            return data;
+        } catch (error) {
+            console.warn(`Proxy ${proxyIndex + 1} failed:`, error);
+            return fetchWithCORS(url, proxyIndex + 1);
+        }
+    }
+    
+    // Load mods from GitHub using CORS proxy
+    async function loadModsFromGitHub() {
+        setStatus("🔄 Loading mods from GitHub...", "loading");
+        modsContainer.innerHTML = '<div class="loading-spinner">🔄 Loading mods from GitHub...</div>';
+        
+        try {
+            // First try direct fetch (might work in some environments)
+            try {
+                const directResponse = await fetch(GITHUB_RAW_URL, {
+                    cache: 'no-store',
+                    mode: 'cors',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (directResponse.ok) {
+                    const data = await directResponse.json();
+                    processModsData(data);
+                    return;
+                }
+            } catch (directError) {
+                console.log("Direct fetch failed, trying CORS proxies...");
             }
             
-            if (allMods.length === 0) {
-                setStatus("⚠️ GitHub mods.json is empty. Add some mods!", "error");
-                modsContainer.innerHTML = '<div class="no-mods">📦 No mods found in GitHub. Please add mods to mods.json file.</div>';
-                return;
-            }
-            
-            applyFilters();
+            // Try CORS proxies
+            const data = await fetchWithCORS(GITHUB_RAW_URL, 0);
+            processModsData(data);
             
         } catch (error) {
-            console.error("GitHub fetch error:", error);
+            console.error("All fetch methods failed:", error);
             setStatus(`❌ Failed to load from GitHub: ${error.message}`, "error");
             modsContainer.innerHTML = `
                 <div class="no-mods">
                     ❌ Cannot load mods from GitHub<br><br>
                     <strong>Error:</strong> ${escapeHtml(error.message)}<br><br>
-                    Check that your mods.json file exists at:<br>
-                    <code style="background:#111; padding:4px; border-radius:4px;">${GITHUB_JSON_URL}</code>
+                    <strong>Possible solutions:</strong><br>
+                    1. ඔයාගේ Cloudflare Pages site එකේ SSL/TLS settings check කරන්න<br>
+                    2. Try again in a few minutes<br>
+                    3. Check that mods.json exists at:<br>
+                    <code style="background:#111; padding:4px; border-radius:4px; word-break:break-all;">${GITHUB_RAW_URL}</code>
                 </div>
             `;
+        }
+    }
+    
+    function processModsData(data) {
+        let modsArray = null;
+        
+        if (data && data.mods && Array.isArray(data.mods)) {
+            modsArray = data.mods;
+            const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
+            setStatus(`✅ Loaded ${modsArray.length} mods from GitHub | Last updated: ${lastUpdated}`, "success");
+        } else if (Array.isArray(data)) {
+            modsArray = data;
+            setStatus(`✅ Loaded ${modsArray.length} mods from GitHub`, "success");
+        } else {
+            throw new Error("Invalid JSON format - expected 'mods' array");
+        }
+        
+        if (modsArray && modsArray.length > 0) {
+            allMods = modsArray;
+            console.log(`✅ Successfully loaded ${allMods.length} mods`);
+            applyFilters();
+        } else {
+            setStatus("⚠️ GitHub mods.json is empty. Add some mods!", "error");
+            modsContainer.innerHTML = '<div class="no-mods">📦 No mods found in GitHub. Please add mods to mods.json file.</div>';
         }
     }
     
@@ -196,7 +248,7 @@
         pageMods.forEach(mod => {
             const card = document.createElement('div');
             card.className = 'mod-card';
-            card.setAttribute('data-mod-id', mod.id);
+            card.setAttribute('data-mod-id', mod.id || mod.name);
             
             const imgUrl = mod.imageUrl && mod.imageUrl.trim() ? mod.imageUrl : 'https://via.placeholder.com/300x150?text=🚌+Bus+Mod';
             const versionLabel = mod.version || 'N/A';
@@ -231,8 +283,8 @@
         document.querySelectorAll('.mod-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.classList.contains('download-btn')) return;
-                const modId = card.getAttribute('data-mod-id');
-                const mod = allMods.find(m => m.id == modId);
+                const modIdOrName = card.getAttribute('data-mod-id');
+                const mod = allMods.find(m => (m.id == modIdOrName) || (m.name === modIdOrName));
                 if (mod) openDetailsModal(mod);
             });
         });
@@ -317,7 +369,7 @@
     // Load mods when page loads
     loadModsFromGitHub();
     
-    // Refresh every 5 minutes (optional)
+    // Refresh every 5 minutes
     setInterval(() => {
         console.log("Auto-refreshing mods from GitHub...");
         loadModsFromGitHub();

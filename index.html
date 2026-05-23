@@ -2,364 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Sri Lankan Bus Mods | ETS2 Bus Mods Collection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Lankan Bus Mods - GitHub Direct</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Lato', sans-serif !important;
-        }
-
-        body {
-            background: #000000;
-            color: #ffffff;
-            line-height: 1.5;
-            padding: 2rem 1rem;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: #ffffff;
-            border-bottom: 1px solid #2a2a2a;
-            display: inline-block;
-            padding-bottom: 0.5rem;
-            cursor: default;
-        }
-
-        .sync-status {
-            text-align: center;
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-            color: #2ecc71;
-        }
-
-        .sync-status.syncing {
-            color: #f39c12;
-        }
-
-        .sync-status.error {
-            color: #e74c3c;
-        }
-
-        .admin-panel {
-            background: #0a0a0a;
-            border-radius: 24px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #2a2a2a;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #2a2a2a;
-        }
-
-        .admin-header h3 {
-            color: #2ecc71;
-        }
-
-        .logout-btn {
-            background: #2a2a2a;
-            color: #ff6666;
-            border: 1px solid #ff6666;
-            padding: 6px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        .add-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .add-form input, .add-form textarea {
-            width: 100%;
-            padding: 12px 14px;
-            background: #111;
-            border: 1px solid #2c2c2c;
-            border-radius: 12px;
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        .add-form button {
-            background: #ffffff;
-            color: #000000;
-            border: none;
-            padding: 12px;
-            border-radius: 40px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .search-wrapper {
-            position: relative;
-            max-width: 400px;
-            margin: 0 auto 2rem auto;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            color: #666;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 20px 12px 48px;
-            background: #0a0a0a;
-            border: 1px solid #2c2c2c;
-            border-radius: 40px;
-            color: #ffffff;
-        }
-
-        .mod-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.8rem;
-            margin-bottom: 2rem;
-        }
-
-        .mod-card {
-            background: #050505;
-            border-radius: 24px;
-            padding: 1.2rem;
-            border: 1px solid #222;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-
-        .mod-card:hover {
-            transform: translateY(-3px);
-            border-color: #ffffff;
-        }
-
-        .mod-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 16px;
-            margin-bottom: 1rem;
-        }
-
-        .mod-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        .mod-badges {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 2px 10px;
-            border-radius: 20px;
-            background: #1a1a1a;
-            color: #ccc;
-        }
-
-        .mod-meta {
-            font-size: 0.75rem;
-            color: #9a9a9a;
-            margin-bottom: 0.5rem;
-        }
-
-        .mod-desc {
-            font-size: 0.8rem;
-            color: #bbbbbb;
-            margin: 0.5rem 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .download-btn {
-            background: #ffffff;
-            color: #000000;
-            font-weight: 600;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            border: 1px solid #ffffff;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-        }
-
-        .edit-btn, .delete-btn {
-            padding: 6px 12px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 8px;
-            width: 48%;
-        }
-
-        .edit-btn {
-            background: #2a2a2a;
-            color: #ffcc00;
-            border: 1px solid #ffcc00;
-        }
-
-        .delete-btn {
-            background: #2a2a2a;
-            color: #ff6666;
-            border: 1px solid #ff6666;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .pagination button {
-            padding: 8px 20px;
-            background: #0a0a0a;
-            color: #ffffff;
-            border: 1px solid #2c2c2c;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.95);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: #0a0a0a;
-            border-radius: 24px;
-            max-width: 600px;
-            width: 90%;
-            padding: 2rem;
-            border: 1px solid #2a2a2a;
-        }
-
-        .login-modal {
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            background: #111;
-            border: 1px solid #2c2c2c;
-            border-radius: 12px;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .login-submit {
-            width: 100%;
-            padding: 12px;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .close-btn {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 28px;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .no-mods {
-            text-align: center;
-            padding: 3rem;
-            color: #aaa;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 3rem;
-            color: #2ecc71;
-        }
-
-        @media (max-width: 640px) {
-            body { padding: 1rem; }
-            h1 { font-size: 1.6rem; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Lato', sans-serif !important; }
+        body { background: #000000; color: #ffffff; line-height: 1.5; padding: 2rem 1rem; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { font-size: 2.2rem; font-weight: 700; border-bottom: 1px solid #2a2a2a; display: inline-block; padding-bottom: 0.5rem; }
+        .status { text-align: center; margin-top: 0.5rem; font-size: 0.8rem; padding: 8px; border-radius: 8px; }
+        .status.success { background: #1a3a1a; color: #2ecc71; }
+        .status.error { background: #3a1a1a; color: #e74c3c; }
+        .status.loading { background: #1a2a3a; color: #f39c12; }
+        .search-wrapper { position: relative; max-width: 400px; margin: 0 auto 2rem auto; }
+        .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: #666; }
+        .search-input { width: 100%; padding: 12px 20px 12px 48px; background: #0a0a0a; border: 1px solid #2c2c2c; border-radius: 40px; color: #ffffff; }
+        .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.8rem; margin-bottom: 2rem; }
+        .mod-card { background: #050505; border-radius: 24px; padding: 1.2rem; border: 1px solid #222; transition: transform 0.2s; cursor: pointer; }
+        .mod-card:hover { transform: translateY(-3px); border-color: #ffffff; }
+        .mod-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 16px; margin-bottom: 1rem; background: #1a1a1a; }
+        .mod-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .badge { font-size: 0.7rem; padding: 2px 10px; border-radius: 20px; background: #1a1a1a; color: #ccc; display: inline-block; }
+        .mod-meta { font-size: 0.75rem; color: #9a9a9a; margin: 0.5rem 0; }
+        .mod-desc { font-size: 0.8rem; color: #bbbbbb; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .download-btn { background: #ffffff; color: #000000; font-weight: 600; padding: 8px 18px; border-radius: 40px; font-size: 0.8rem; border: none; cursor: pointer; width: 100%; text-align: center; }
+        .download-btn:hover { background: #333; color: #fff; }
+        .pagination { display: flex; justify-content: center; gap: 20px; margin: 30px 0; }
+        .pagination button { padding: 8px 20px; background: #0a0a0a; color: #ffffff; border: 1px solid #2c2c2c; border-radius: 40px; cursor: pointer; }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center; }
+        .modal-content { background: #0a0a0a; border-radius: 24px; max-width: 600px; width: 90%; padding: 2rem; border: 1px solid #2a2a2a; max-height: 85vh; overflow-y: auto; }
+        .close-btn { position: absolute; right: 20px; top: 15px; font-size: 28px; color: #aaa; cursor: pointer; }
+        .no-mods { text-align: center; padding: 3rem; color: #aaa; }
+        .loading-spinner { text-align: center; padding: 3rem; color: #f39c12; }
+        @media (max-width: 640px) { body { padding: 1rem; } h1 { font-size: 1.6rem; } }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1 id="mainTitle">🇱🇰 Sri Lankan Bus Mods</h1>
-        <div id="syncStatus" class="sync-status">🔄 Loading mods from GitHub...</div>
+        <h1>🇱🇰 Sri Lankan Bus Mods</h1>
+        <div id="status" class="status loading">🔄 Loading mods from GitHub...</div>
     </header>
-
-    <div id="adminPanel" class="admin-panel" style="display: none;">
-        <div class="admin-header">
-            <h3>🔧 Admin Panel</h3>
-            <button id="logoutBtn" class="logout-btn">Logout</button>
-        </div>
-        <form id="addModForm" class="add-form">
-            <input type="text" id="modName" placeholder="Mod Name" required>
-            <input type="text" id="modVersion" placeholder="Game Version (e.g., 1.59)" required>
-            <input type="text" id="modAuthor" placeholder="Author Name" required>
-            <input type="url" id="modImage" placeholder="Image URL">
-            <input type="url" id="modDownload" placeholder="Download URL" required>
-            <textarea id="modDescription" placeholder="Description..." rows="3"></textarea>
-            <button type="submit">➕ Add Mod</button>
-        </form>
-        <div style="margin-top: 1rem; font-size: 0.75rem; color: #666; text-align: center;">
-            ⚡ Mods are saved locally. To sync across devices, update mods.json in GitHub.
-        </div>
-    </div>
 
     <div class="search-wrapper">
         <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18">
@@ -369,22 +54,13 @@
     </div>
 
     <div id="modsContainer" class="mod-grid">
-        <div class="loading-spinner">🔄 Loading mods...</div>
+        <div class="loading-spinner">🔄 Loading...</div>
     </div>
 
     <div class="pagination">
         <button id="prevPageBtn">◀ Previous</button>
         <span id="pageInfo">Page 1 of 1</span>
         <button id="nextPageBtn">Next ▶</button>
-    </div>
-</div>
-
-<div id="loginModal" class="modal">
-    <div class="modal-content login-modal">
-        <span class="close-btn">&times;</span>
-        <h3>Admin Login</h3>
-        <input type="password" id="adminPassword" placeholder="Enter Password" class="login-input">
-        <button id="loginSubmitBtn" class="login-submit">Login</button>
     </div>
 </div>
 
@@ -396,458 +72,256 @@
 </div>
 
 <script>
-// ============================================
-// SRILANKAN BUS MODS - GitHub Version
-// Loads from: https://github.com/fzrholdings/sri-lankan-bus-mods
-// ============================================
-
-const ADMIN_PASSWORD = "nandigawaya25";
-let isAdmin = false;
-let allMods = [];
-let currentPage = 1;
-const modsPerPage = 24;
-let filteredMods = [];
-
-// Your GitHub repo details
-const GITHUB_RAW_URL = "https://raw.githubusercontent.com/fzrholdings/sri-lankan-bus-mods/main/mods.json";
-const LOCAL_BACKUP_KEY = "sl_bus_mods_backup";
-const OLD_STORAGE_KEY = "sri_lankan_bus_mods";
-
-// DOM Elements
-const modsContainer = document.getElementById('modsContainer');
-const searchInput = document.getElementById('searchInput');
-const prevBtn = document.getElementById('prevPageBtn');
-const nextBtn = document.getElementById('nextPageBtn');
-const pageInfoSpan = document.getElementById('pageInfo');
-const adminPanel = document.getElementById('adminPanel');
-const loginModal = document.getElementById('loginModal');
-const loginSubmitBtn = document.getElementById('loginSubmitBtn');
-const adminPassword = document.getElementById('adminPassword');
-const logoutBtn = document.getElementById('logoutBtn');
-const addModForm = document.getElementById('addModForm');
-const mainTitle = document.getElementById('mainTitle');
-const syncStatus = document.getElementById('syncStatus');
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-function setSyncStatus(message, isError = false) {
-    syncStatus.textContent = message;
-    syncStatus.className = 'sync-status';
-    if (isError) {
-        syncStatus.classList.add('error');
-    } else if (message.includes('Loading') || message.includes('Syncing')) {
-        syncStatus.classList.add('syncing');
-    }
-}
-
-// ========== MIGRATE OLD DATA FROM PREVIOUS VERSION ==========
-function migrateOldData() {
-    try {
-        const oldData = localStorage.getItem(OLD_STORAGE_KEY);
-        if (oldData && oldData !== 'undefined') {
-            const oldMods = JSON.parse(oldData);
-            if (oldMods && oldMods.length > 0) {
-                localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(oldMods));
-                console.log(`✅ Migrated ${oldMods.length} mods from old storage!`);
-                return oldMods;
-            }
-        }
-        return null;
-    } catch(e) {
-        console.log("Migration error:", e);
-        return null;
-    }
-}
-
-// ========== LOAD MODS FROM GITHUB ==========
-async function loadModsFromGitHub() {
-    setSyncStatus("🔄 Loading mods from GitHub...");
-    modsContainer.innerHTML = '<div class="loading-spinner">🔄 Loading mods from GitHub...</div>';
+    // ============================================
+    // DIRECT GITHUB JSON READER - NO LOCAL STORAGE
+    // ============================================
     
-    try {
-        // Try to load from GitHub raw URL
-        const response = await fetch(GITHUB_RAW_URL, {
-            cache: 'no-cache',
-            headers: { 'Cache-Control': 'no-cache' }
+    // Your GitHub raw JSON URL
+    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/fzrholdings/sri-lankan-bus-mods/main/mods.json";
+    
+    let allMods = [];
+    let filteredMods = [];
+    let currentPage = 1;
+    const modsPerPage = 24;
+    
+    // DOM elements
+    const modsContainer = document.getElementById('modsContainer');
+    const searchInput = document.getElementById('searchInput');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const pageInfoSpan = document.getElementById('pageInfo');
+    const statusDiv = document.getElementById('status');
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
         });
+    }
+    
+    function setStatus(message, type = 'loading') {
+        statusDiv.textContent = message;
+        statusDiv.className = `status ${type}`;
+    }
+    
+    // Load mods directly from GitHub
+    async function loadModsFromGitHub() {
+        setStatus("🔄 Fetching mods from GitHub...", "loading");
+        modsContainer.innerHTML = '<div class="loading-spinner">🔄 Loading mods from GitHub...</div>';
         
-        if (response.ok) {
-            const data = await response.json();
+        try {
+            const response = await fetch(GITHUB_JSON_URL, {
+                cache: 'no-store',  // Don't cache
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log("GitHub Response:", data);
+            
+            // Check if data has mods array
             if (data && data.mods && Array.isArray(data.mods)) {
                 allMods = data.mods;
-                localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
-                setSyncStatus(`✅ Loaded ${allMods.length} mods from GitHub repo`);
-                console.log("✅ Loaded from GitHub:", allMods.length, "mods");
-                applyFilters();
-                return;
+                const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
+                setStatus(`✅ Loaded ${allMods.length} mods from GitHub | Last updated: ${lastUpdated}`, "success");
+                console.log(`✅ Successfully loaded ${allMods.length} mods`);
+            } else if (Array.isArray(data)) {
+                // If JSON is just an array
+                allMods = data;
+                setStatus(`✅ Loaded ${allMods.length} mods from GitHub`, "success");
             } else {
-                throw new Error("Invalid mods.json format");
+                throw new Error("Invalid JSON format - expected 'mods' array");
             }
-        } else {
-            throw new Error(`HTTP ${response.status}`);
-        }
-    } catch (error) {
-        console.error("GitHub load error:", error);
-        
-        // Try to migrate old data first
-        const migratedMods = migrateOldData();
-        if (migratedMods) {
-            allMods = migratedMods;
-            setSyncStatus(`📦 Migrated ${allMods.length} mods from previous version`, true);
-            applyFilters();
-            return;
-        }
-        
-        // Try local backup
-        const backup = localStorage.getItem(LOCAL_BACKUP_KEY);
-        if (backup && backup !== 'undefined') {
-            allMods = JSON.parse(backup);
-            setSyncStatus(`📱 Using local backup (${allMods.length} mods)`, true);
-            applyFilters();
-            return;
-        }
-        
-        // Default sample mods
-        allMods = [
-            {
-                id: "1",
-                name: "SLTB Leyland Bus",
-                version: "1.59",
-                author: "LK Modder",
-                imageUrl: "https://via.placeholder.com/300x150?text=SLTB+Bus",
-                downloadUrl: "#",
-                description: "Classic Sri Lankan transport bus mod for ETS2.",
-                timestamp: new Date().toISOString()
-            },
-            {
-                id: "2",
-                name: "Ashok Leyland Samara",
-                version: "1.59",
-                author: "Colombo Mods",
-                imageUrl: "https://via.placeholder.com/300x150?text=Ashok+Leyland",
-                downloadUrl: "#",
-                description: "Popular intercity bus model from Sri Lanka.",
-                timestamp: new Date().toISOString()
+            
+            if (allMods.length === 0) {
+                setStatus("⚠️ GitHub mods.json is empty. Add some mods!", "error");
+                modsContainer.innerHTML = '<div class="no-mods">📦 No mods found in GitHub. Please add mods to mods.json file.</div>';
+                return;
             }
-        ];
-        localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
-        setSyncStatus("📦 Using default mods", true);
-        applyFilters();
-    }
-}
-
-// ========== SAVE MODS TO LOCAL (no GitHub write) ==========
-function saveModsToLocal() {
-    localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(allMods));
-    setSyncStatus(`💾 Saved ${allMods.length} mods to local backup`);
-}
-
-// ========== ADMIN FUNCTIONS ==========
-function checkAdminStatus() {
-    try {
-        const adminStatus = sessionStorage.getItem('bus_mods_admin');
-        if (adminStatus === 'true') {
-            isAdmin = true;
-            adminPanel.style.display = 'block';
-        } else {
-            isAdmin = false;
-            adminPanel.style.display = 'none';
+            
+            applyFilters();
+            
+        } catch (error) {
+            console.error("GitHub fetch error:", error);
+            setStatus(`❌ Failed to load from GitHub: ${error.message}`, "error");
+            modsContainer.innerHTML = `
+                <div class="no-mods">
+                    ❌ Cannot load mods from GitHub<br><br>
+                    <strong>Error:</strong> ${escapeHtml(error.message)}<br><br>
+                    Check that your mods.json file exists at:<br>
+                    <code style="background:#111; padding:4px; border-radius:4px;">${GITHUB_JSON_URL}</code>
+                </div>
+            `;
         }
-    } catch(e) {
-        isAdmin = false;
-        adminPanel.style.display = 'none';
     }
-}
-
-function showAdminLoginModal() {
-    if (!isAdmin) {
-        loginModal.style.display = 'flex';
-    } else {
-        alert("You are already logged in!");
-    }
-}
-
-function login(password) {
-    if (password === ADMIN_PASSWORD) {
-        try {
-            sessionStorage.setItem('bus_mods_admin', 'true');
-        } catch(e) {}
-        isAdmin = true;
-        adminPanel.style.display = 'block';
-        loginModal.style.display = 'none';
-        adminPassword.value = '';
+    
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        if (searchTerm === '') {
+            filteredMods = [...allMods];
+        } else {
+            filteredMods = allMods.filter(mod => {
+                return (mod.name && mod.name.toLowerCase().includes(searchTerm)) ||
+                       (mod.author && mod.author.toLowerCase().includes(searchTerm)) ||
+                       (mod.description && mod.description.toLowerCase().includes(searchTerm));
+            });
+        }
+        
+        currentPage = 1;
         renderCurrentPage();
-        alert('✅ Login successful!');
-    } else {
-        alert('❌ Wrong password!');
     }
-}
-
-function logout() {
-    try {
-        sessionStorage.removeItem('bus_mods_admin');
-    } catch(e) {}
-    isAdmin = false;
-    adminPanel.style.display = 'none';
-    renderCurrentPage();
-    alert('Logged out!');
-}
-
-function addMod(mod) {
-    if (!mod.name || !mod.version || !mod.author || !mod.downloadUrl) {
-        alert('Please fill all required fields!');
-        return false;
-    }
-    mod.id = Date.now().toString();
-    mod.timestamp = new Date().toISOString();
-    allMods.unshift(mod);
-    saveModsToLocal();
-    applyFilters();
-    alert('✅ Mod added to local storage!');
-    return true;
-}
-
-function openEditModal(modId) {
-    const mod = allMods.find(m => m.id === modId);
-    if (!mod) return;
-    document.getElementById('editModId').value = mod.id;
-    document.getElementById('editModName').value = mod.name || '';
-    document.getElementById('editModVersion').value = mod.version || '';
-    document.getElementById('editModAuthor').value = mod.author || '';
-    document.getElementById('editModImage').value = mod.imageUrl || '';
-    document.getElementById('editModDownload').value = mod.downloadUrl || '';
-    document.getElementById('editModDescription').value = mod.description || '';
-    editModal.style.display = 'flex';
-}
-
-function updateMod(updatedMod) {
-    const index = allMods.findIndex(m => m.id === updatedMod.id);
-    if (index !== -1) {
-        updatedMod.timestamp = new Date().toISOString();
-        allMods[index] = { ...allMods[index], ...updatedMod };
-        saveModsToLocal();
-        applyFilters();
-        alert('✅ Mod updated locally!');
-        return true;
-    }
-    return false;
-}
-
-function deleteMod(modId) {
-    if (confirm('Are you sure you want to delete this mod?')) {
-        allMods = allMods.filter(mod => mod.id !== modId);
-        saveModsToLocal();
-        applyFilters();
-        alert('🗑️ Mod deleted!');
-    }
-}
-
-function openDownloadInNewTab(url) {
-    if (url && url !== '#' && url.trim() !== '') {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-        alert('Download link not available');
-    }
-}
-
-function applyFilters() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    filteredMods = allMods.filter(mod => {
-        return searchTerm === '' ||
-            (mod.name && mod.name.toLowerCase().includes(searchTerm)) ||
-            (mod.author && mod.author.toLowerCase().includes(searchTerm)) ||
-            (mod.description && mod.description.toLowerCase().includes(searchTerm));
-    });
-    currentPage = 1;
-    renderCurrentPage();
-}
-
-function renderCurrentPage() {
-    if (!filteredMods.length) {
-        modsContainer.innerHTML = '<div class="no-mods">🚌 No bus mods found. Double-click title to login and add mods!</div>';
-        updatePaginationInfo();
-        return;
-    }
-
-    const start = (currentPage - 1) * modsPerPage;
-    const end = start + modsPerPage;
-    const pageMods = filteredMods.slice(start, end);
-
-    modsContainer.innerHTML = '';
-    pageMods.forEach(mod => {
-        const card = document.createElement('div');
-        card.className = 'mod-card';
-        card.setAttribute('data-mod-id', mod.id);
-        const imgUrl = mod.imageUrl && mod.imageUrl.trim() ? mod.imageUrl : 'https://via.placeholder.com/300x150?text=🚌+Bus+Mod';
-        
-        let adminButtons = '';
-        if (isAdmin) {
-            adminButtons = `<div class="admin-actions"><button class="edit-btn" data-id="${mod.id}">✏️ Edit</button><button class="delete-btn" data-id="${mod.id}">🗑️ Delete</button></div>`;
+    
+    function renderCurrentPage() {
+        if (!filteredMods.length) {
+            modsContainer.innerHTML = '<div class="no-mods">🚌 No bus mods found. Try a different search term.</div>';
+            updatePaginationInfo();
+            return;
         }
-
-        card.innerHTML = `
-            <img src="${imgUrl}" alt="${escapeHtml(mod.name)}" onerror="this.src='https://via.placeholder.com/300x150?text=🚌+Bus+Mod'">
-            <h3>${escapeHtml(mod.name)}</h3>
-            <div class="mod-badges"><span class="badge">📌 v${escapeHtml(mod.version || 'N/A')}</span></div>
-            <div class="mod-meta">👤 ${escapeHtml(mod.author || 'Unknown')}</div>
-            <div class="mod-desc">📝 ${escapeHtml((mod.description || 'No description').substring(0, 100))}</div>
-            <button class="download-btn" data-url="${escapeHtml(mod.downloadUrl)}">⬇️ Download</button>
-            ${adminButtons}
+        
+        const start = (currentPage - 1) * modsPerPage;
+        const end = start + modsPerPage;
+        const pageMods = filteredMods.slice(start, end);
+        
+        modsContainer.innerHTML = '';
+        
+        pageMods.forEach(mod => {
+            const card = document.createElement('div');
+            card.className = 'mod-card';
+            card.setAttribute('data-mod-id', mod.id);
+            
+            const imgUrl = mod.imageUrl && mod.imageUrl.trim() ? mod.imageUrl : 'https://via.placeholder.com/300x150?text=🚌+Bus+Mod';
+            const versionLabel = mod.version || 'N/A';
+            const authorLabel = mod.author || 'Unknown';
+            const desc = mod.description ? (mod.description.length > 100 ? mod.description.substring(0, 100) + '…' : mod.description) : 'No description';
+            
+            card.innerHTML = `
+                <img src="${imgUrl}" alt="${escapeHtml(mod.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x150?text=🚌+Bus+Mod'">
+                <h3>${escapeHtml(mod.name)}</h3>
+                <div><span class="badge">📌 v${escapeHtml(versionLabel)}</span></div>
+                <div class="mod-meta">👤 ${escapeHtml(authorLabel)}</div>
+                <div class="mod-desc">📝 ${escapeHtml(desc)}</div>
+                <button class="download-btn" data-url="${escapeHtml(mod.downloadUrl)}">⬇️ Download</button>
+            `;
+            modsContainer.appendChild(card);
+        });
+        
+        // Attach download events
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const url = btn.getAttribute('data-url');
+                if (url && url !== '#') {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                } else {
+                    alert('Download link not available');
+                }
+            });
+        });
+        
+        // Attach card click for details
+        document.querySelectorAll('.mod-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('download-btn')) return;
+                const modId = card.getAttribute('data-mod-id');
+                const mod = allMods.find(m => m.id == modId);
+                if (mod) openDetailsModal(mod);
+            });
+        });
+        
+        updatePaginationInfo();
+    }
+    
+    function openDetailsModal(mod) {
+        const modal = document.getElementById('detailsModal');
+        const container = document.getElementById('detailsContent');
+        const imgUrl = mod.imageUrl && mod.imageUrl.trim() ? mod.imageUrl : 'https://via.placeholder.com/400x200?text=No+Image';
+        
+        container.innerHTML = `
+            <div style="text-align:center">
+                <img src="${imgUrl}" style="max-width:100%; border-radius:16px;" onerror="this.src='https://via.placeholder.com/400x200'">
+            </div>
+            <h2 style="margin-top:1rem">${escapeHtml(mod.name)}</h2>
+            <p><strong>📌 Version:</strong> ${escapeHtml(mod.version || 'N/A')}</p>
+            <p><strong>👤 Author:</strong> ${escapeHtml(mod.author || 'Unknown')}</p>
+            <div style="background:#111; padding:1rem; border-radius:12px; margin:1rem 0;">
+                <strong>📝 Description:</strong>
+                <p style="margin-top:0.5rem; color:#bbb;">${escapeHtml(mod.description || 'No description available.')}</p>
+            </div>
+            <button id="detailsDownloadBtn" style="background:#fff; color:#000; padding:12px; border-radius:40px; width:100%; border:none; font-weight:700; cursor:pointer;">⬇️ Download Mod</button>
         `;
-        modsContainer.appendChild(card);
+        
+        modal.style.display = 'flex';
+        
+        const downloadBtn = document.getElementById('detailsDownloadBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                if (mod.downloadUrl && mod.downloadUrl !== '#') {
+                    window.open(mod.downloadUrl, '_blank', 'noopener,noreferrer');
+                } else {
+                    alert('Download link not available');
+                }
+            });
+        }
+    }
+    
+    function updatePaginationInfo() {
+        const totalPages = Math.ceil(filteredMods.length / modsPerPage);
+        pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= totalPages;
+    }
+    
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderCurrentPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    
+    function nextPage() {
+        const totalPages = Math.ceil(filteredMods.length / modsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderCurrentPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    
+    function closeModals() {
+        const modal = document.getElementById('detailsModal');
+        if (modal) modal.style.display = 'none';
+    }
+    
+    // Event Listeners
+    searchInput.addEventListener('input', applyFilters);
+    prevBtn.addEventListener('click', prevPage);
+    nextBtn.addEventListener('click', nextPage);
+    
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', closeModals);
     });
-
-    // Attach events
-    document.querySelectorAll('.mod-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('download-btn') || e.target.classList.contains('edit-btn') || e.target.classList.contains('delete-btn')) return;
-            const modId = card.getAttribute('data-mod-id');
-            const mod = allMods.find(m => m.id === modId);
-            if (mod) {
-                const modal = document.getElementById('detailsModal');
-                const container = document.getElementById('detailsContent');
-                container.innerHTML = `
-                    <div style="text-align:center"><img src="${mod.imageUrl || 'https://via.placeholder.com/400x200'}" style="max-width:100%; border-radius:16px;" onerror="this.src='https://via.placeholder.com/400x200'"></div>
-                    <h2 style="margin-top:1rem">${escapeHtml(mod.name)}</h2>
-                    <p><strong>📌 Version:</strong> ${escapeHtml(mod.version)}</p>
-                    <p><strong>👤 Author:</strong> ${escapeHtml(mod.author)}</p>
-                    <p><strong>📝 Description:</strong> ${escapeHtml(mod.description || 'No description')}</p>
-                    <button class="download-details-btn" data-url="${escapeHtml(mod.downloadUrl)}" style="background:#fff; color:#000; padding:12px; border-radius:40px; width:100%; margin-top:1rem; cursor:pointer; font-weight:bold;">⬇️ Download Mod</button>
-                `;
-                modal.style.display = 'flex';
-                const detailsBtn = container.querySelector('.download-details-btn');
-                if (detailsBtn) detailsBtn.addEventListener('click', () => openDownloadInNewTab(detailsBtn.getAttribute('data-url')));
-            }
-        });
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) closeModals();
     });
-
-    document.querySelectorAll('.download-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openDownloadInNewTab(btn.getAttribute('data-url'));
-        });
-    });
-
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openEditModal(btn.getAttribute('data-id'));
-        });
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteMod(btn.getAttribute('data-id'));
-        });
-    });
-
-    updatePaginationInfo();
-}
-
-function updatePaginationInfo() {
-    const totalPages = Math.ceil(filteredMods.length / modsPerPage);
-    pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages || 1}`;
-    prevBtn.disabled = currentPage <= 1;
-    nextBtn.disabled = currentPage >= totalPages;
-}
-
-function prevPage() { if (currentPage > 1) { currentPage--; renderCurrentPage(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-function nextPage() { const totalPages = Math.ceil(filteredMods.length / modsPerPage); if (currentPage < totalPages) { currentPage++; renderCurrentPage(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-
-function closeModals() {
-    const details = document.getElementById('detailsModal');
-    const login = document.getElementById('loginModal');
-    const edit = document.getElementById('editModal');
-    if (details) details.style.display = 'none';
-    if (login) login.style.display = 'none';
-    if (edit) edit.style.display = 'none';
-}
-
-// Create Edit Modal dynamically
-const editModal = document.createElement('div');
-editModal.id = 'editModal';
-editModal.className = 'modal';
-editModal.innerHTML = `
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3 style="color:#ffcc00">✏️ Edit Bus Mod</h3>
-        <form id="editModForm" style="display:flex; flex-direction:column; gap:12px; margin-top:1rem;">
-            <input type="hidden" id="editModId">
-            <input type="text" id="editModName" placeholder="Mod Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="text" id="editModVersion" placeholder="Game Version" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="text" id="editModAuthor" placeholder="Author Name" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="url" id="editModImage" placeholder="Image URL" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <input type="url" id="editModDownload" placeholder="Download URL" required style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;">
-            <textarea id="editModDescription" placeholder="Description..." rows="3" style="padding:12px; background:#111; border:1px solid #2c2c2c; border-radius:12px; color:white;"></textarea>
-            <button type="submit" style="background:#fff; color:#000; padding:12px; border-radius:40px; font-weight:700; cursor:pointer;">💾 Save Changes</button>
-        </form>
-    </div>
-`;
-document.body.appendChild(editModal);
-
-// Edit form event
-const editModFormElem = document.getElementById('editModForm');
-if (editModFormElem) {
-    editModFormElem.addEventListener('submit', (e) => {
-        e.preventDefault();
-        updateMod({
-            id: document.getElementById('editModId').value,
-            name: document.getElementById('editModName').value.trim(),
-            version: document.getElementById('editModVersion').value.trim(),
-            author: document.getElementById('editModAuthor').value.trim(),
-            imageUrl: document.getElementById('editModImage').value.trim(),
-            downloadUrl: document.getElementById('editModDownload').value.trim(),
-            description: document.getElementById('editModDescription').value.trim()
-        });
-        editModal.style.display = 'none';
-    });
-}
-
-// Event Listeners
-searchInput.addEventListener('input', applyFilters);
-prevBtn.addEventListener('click', prevPage);
-nextBtn.addEventListener('click', nextPage);
-mainTitle.addEventListener('dblclick', () => showAdminLoginModal());
-loginSubmitBtn.addEventListener('click', () => login(adminPassword.value));
-adminPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(adminPassword.value); });
-logoutBtn.addEventListener('click', logout);
-
-addModForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    addMod({
-        name: document.getElementById('modName').value.trim(),
-        version: document.getElementById('modVersion').value.trim(),
-        author: document.getElementById('modAuthor').value.trim(),
-        imageUrl: document.getElementById('modImage').value.trim(),
-        downloadUrl: document.getElementById('modDownload').value.trim(),
-        description: document.getElementById('modDescription').value.trim()
-    });
-    addModForm.reset();
-});
-
-// Close modals
-document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.addEventListener('click', closeModals);
-});
-window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) closeModals();
-});
-
-// Initialize
-loadModsFromGitHub();
-checkAdminStatus();
-
-console.log("✅ Site loaded! Mods from: https://github.com/fzrholdings/sri-lankan-bus-mods");
+    
+    // Load mods when page loads
+    loadModsFromGitHub();
+    
+    // Refresh every 5 minutes (optional)
+    setInterval(() => {
+        console.log("Auto-refreshing mods from GitHub...");
+        loadModsFromGitHub();
+    }, 5 * 60 * 1000);
 </script>
 </body>
 </html>

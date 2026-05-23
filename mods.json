@@ -1,0 +1,26 @@
+{
+  "lastUpdated": "2026-05-24T10:30:00.000Z",
+  "totalMods": 2,
+  "mods": [
+    {
+      "id": "1",
+      "name": "SLTB Leyland Bus",
+      "version": "1.59",
+      "author": "LK Modder",
+      "imageUrl": "https://via.placeholder.com/300x150?text=SLTB+Bus",
+      "downloadUrl": "https://example.com/download1",
+      "description": "Classic Sri Lankan transport bus mod for ETS2.",
+      "timestamp": "2026-05-24T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Ashok Leyland Samara",
+      "version": "1.59",
+      "author": "Colombo Mods",
+      "imageUrl": "https://via.placeholder.com/300x150?text=Ashok+Leyland",
+      "downloadUrl": "https://example.com/download2",
+      "description": "Popular intercity bus model from Sri Lanka.",
+      "timestamp": "2026-05-24T10:00:00.000Z"
+    }
+  ]
+}

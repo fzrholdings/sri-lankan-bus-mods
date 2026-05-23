@@ -28,7 +28,7 @@ const cancelAdminBtn = document.getElementById("cancelAdminBtn");
 const detailsModal = document.getElementById("detailsModal");
 const detailsContent = document.getElementById("detailsContent");
 
-// ========== HELPER: escape HTML ==========
+// Helper: escape HTML
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -39,7 +39,7 @@ function escapeHtml(str) {
     });
 }
 
-// ========== LOAD MODS FROM GITHUB ==========
+// Load mods from GitHub raw
 async function loadModsFromGitHub() {
     try {
         const res = await fetch(RAW_URL + "?t=" + Date.now());
@@ -54,10 +54,11 @@ async function loadModsFromGitHub() {
         applyFilters();
     } catch (err) {
         modsContainer.innerHTML = `<div class="error">Failed to load mods: ${err.message}</div>`;
+        console.error(err);
     }
 }
 
-// ========== FILTER (only search) ==========
+// Filter (search only)
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase().trim();
     filteredMods = allMods.filter(mod => {
@@ -70,7 +71,7 @@ function applyFilters() {
     renderCurrentPage();
 }
 
-// ========== RENDER MODS (with admin icons) ==========
+// Render mods
 function renderCurrentPage() {
     if (!filteredMods.length) {
         modsContainer.innerHTML = '<div class="no-mods">No mods found. Try a different search.</div>';
@@ -102,11 +103,10 @@ function renderCurrentPage() {
                 <span class="delete-mod" data-id="${mod.id}">Del</span>
             </div>` : ''}
         `;
-
         modsContainer.appendChild(card);
     });
 
-    // Download button: open in new tab
+    // Download button: new tab
     document.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -119,7 +119,7 @@ function renderCurrentPage() {
         });
     });
 
-    // Card click -> open details modal
+    // Card click -> details modal
     document.querySelectorAll('.mod-card').forEach(card => {
         card.addEventListener('click', (e) => {
             if (e.target.closest('.download-btn') || e.target.closest('.admin-icons')) return;
@@ -129,7 +129,7 @@ function renderCurrentPage() {
         });
     });
 
-    // Admin edit/delete (text buttons)
+    // Admin edit/delete
     if (isAdmin) {
         document.querySelectorAll('.edit-mod').forEach(span => {
             span.addEventListener('click', (e) => {
@@ -153,7 +153,7 @@ function renderCurrentPage() {
     updatePaginationInfo();
 }
 
-// ========== DETAILS MODAL (simple modern) ==========
+// Details modal
 function openDetailsModal(mod) {
     const imgUrl = mod.imageUrl && mod.imageUrl.trim() ? mod.imageUrl : "https://via.placeholder.com/600x300?text=No+Image";
     detailsContent.innerHTML = `
@@ -185,30 +185,48 @@ function openDetailsModal(mod) {
     }
 }
 
-// ========== GITHUB COMMIT (admin) ==========
+// ========== GITHUB COMMIT (fixed with proper error handling) ==========
 async function commitToGitHub(newContentArray) {
     if (!gitHubToken) throw new Error("Not authenticated");
+
+    // 1. Get current file SHA
     const res = await fetch(API_URL, {
         headers: { Authorization: `token ${gitHubToken}`, Accept: "application/vnd.github.v3+json" }
     });
-    if (!res.ok) throw new Error("Failed to fetch file info");
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Failed to fetch file info: ${res.status} ${errText}`);
+    }
     const fileData = await res.json();
     const sha = fileData.sha;
-    const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(newContentArray, null, 2))));
+
+    // 2. Prepare base64 content (correct way for browser)
+    const jsonString = JSON.stringify(newContentArray, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+
+    // 3. Commit
     const putRes = await fetch(API_URL, {
         method: "PUT",
         headers: { Authorization: `token ${gitHubToken}`, "Content-Type": "application/json" },
         body: JSON.stringify({
             message: "Update mods.json via web admin",
-            content: contentBase64,
+            content: base64Content,
             sha: sha,
             branch: "main"
         })
     });
-    if (!putRes.ok) throw new Error("Commit failed");
+
+    if (!putRes.ok) {
+        const errorBody = await putRes.text();
+        throw new Error(`GitHub commit failed (${putRes.status}): ${errorBody}`);
+    }
+
+    const result = await putRes.json();
+    console.log("Commit successful:", result);
     return true;
 }
 
+// Save mod (add or edit)
 async function saveMod(modData, isEdit = false) {
     let newMods = [...allMods];
     if (isEdit) {
@@ -227,23 +245,26 @@ async function saveMod(modData, isEdit = false) {
         alert("Mod saved successfully!");
         return true;
     } catch (err) {
+        console.error("Save error:", err);
         alert("Error saving: " + err.message);
         return false;
     }
 }
 
+// Delete mod
 async function deleteModById(id) {
     const newMods = allMods.filter(m => m.id != id);
     try {
         await commitToGitHub(newMods);
         await loadModsFromGitHub();
-        alert("Mod deleted.");
+        alert("Mod deleted permanently from GitHub.");
     } catch (err) {
-        alert("Delete failed: " + err.message);
+        console.error("Delete error:", err);
+        alert("Delete failed: " + err.message + "\nCheck console for details.");
     }
 }
 
-// ========== ADMIN MODAL HANDLERS ==========
+// Admin modal handlers
 function openEditModal(mod) {
     adminModalTitle.innerText = "Edit Mod";
     document.getElementById("editModId").value = mod.id;
@@ -267,7 +288,7 @@ function closeAllModals() {
     document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
 }
 
-// ========== ADMIN LOGIN (double click title) ==========
+// Admin login: double click title
 mainTitle.addEventListener("dblclick", async () => {
     const token = prompt("Enter GitHub Personal Access Token (repo scope):");
     if (!token) return;
@@ -277,13 +298,13 @@ mainTitle.addEventListener("dblclick", async () => {
             gitHubToken = token;
             isAdmin = true;
             adminPanelDiv.style.display = "block";
-            alert("Admin mode enabled!");
-            renderCurrentPage();
+            alert("Admin mode enabled! You can now Edit/Delete mods.");
+            renderCurrentPage();  // refresh to show edit/del icons
         } else {
             alert("Invalid token or no permission to repo.");
         }
     } catch (e) {
-        alert("Connection error.");
+        alert("Connection error: " + e.message);
     }
 });
 
@@ -315,7 +336,7 @@ adminForm.addEventListener("submit", async (e) => {
 
 cancelAdminBtn.addEventListener("click", closeAllModals);
 
-// ========== PAGINATION ==========
+// Pagination
 function updatePaginationInfo() {
     const totalPages = Math.ceil(filteredMods.length / modsPerPage);
     pageInfoSpan.innerText = `Page ${currentPage} of ${totalPages || 1}`;
@@ -338,7 +359,7 @@ function nextPage() {
     }
 }
 
-// ========== EVENT LISTENERS ==========
+// Event listeners
 searchInput.addEventListener("input", applyFilters);
 prevBtn.addEventListener("click", prevPage);
 nextBtn.addEventListener("click", nextPage);
@@ -351,5 +372,5 @@ window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) closeAllModals();
 });
 
-// ========== START ==========
+// Start
 loadModsFromGitHub();

@@ -127,6 +127,11 @@
             margin-bottom: 1rem;
             color: #ffcc00;
         }
+        
+        /* Download button - ensure cursor pointer */
+        .download-btn {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -216,13 +221,7 @@
     </div>
 </div>
 
-<!-- Download Modal -->
-<div id="downloadModal" class="modal">
-    <div class="modal-content iframe-modal">
-        <span class="close-btn download-close">&times;</span>
-        <iframe id="modalIframe" src="about:blank"></iframe>
-    </div>
-</div>
+<!-- Download Modal - REMOVED/NO LONGER USED (downloads open in new tab directly) -->
 
 <script>
 // ========== CONFIGURATION ==========
@@ -375,7 +374,6 @@ function openEditModal(modId) {
 function updateMod(updatedMod) {
     const index = allMods.findIndex(m => m.id === updatedMod.id);
     if (index !== -1) {
-        // Preserve original id and timestamp, but update timestamp to show edit time
         updatedMod.timestamp = new Date().toISOString();
         allMods[index] = { ...allMods[index], ...updatedMod };
         saveModsToStorage();
@@ -392,6 +390,16 @@ function deleteMod(modId) {
         saveModsToStorage();
         applyFilters();
         alert('Mod deleted!');
+    }
+}
+
+// ========== DOWNLOAD FUNCTION - Opens in new tab directly ==========
+function openDownloadInNewTab(url) {
+    if (url && url !== '#' && url.trim() !== '') {
+        // Open the download link in a new tab directly
+        window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+        alert('Download link not available');
     }
 }
 
@@ -468,16 +476,12 @@ function renderCurrentPage() {
         });
     });
 
-    // Attach download button events
+    // Attach download button events - NOW OPENS IN NEW TAB DIRECTLY
     document.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const url = btn.getAttribute('data-url');
-            if (url && url !== '#') {
-                openDownloadModal(url);
-            } else {
-                alert('Download link not available');
-            }
+            openDownloadInNewTab(url);
         });
     });
 
@@ -560,11 +564,7 @@ function openDetailsModal(mod) {
     if (detailsBtn) {
         detailsBtn.addEventListener('click', (e) => {
             const url = detailsBtn.getAttribute('data-url');
-            if (url && url !== '#') {
-                openDownloadModal(url);
-            } else {
-                alert('Download link not available');
-            }
+            openDownloadInNewTab(url);
         });
     }
     
@@ -578,28 +578,13 @@ function openDetailsModal(mod) {
     }
 }
 
-function openDownloadModal(url) {
-    const modal = document.getElementById('downloadModal');
-    const iframe = document.getElementById('modalIframe');
-    if (modal && iframe) {
-        iframe.src = url;
-        modal.style.display = 'flex';
-    } else {
-        window.open(url, '_blank');
-    }
-}
-
 function closeModals() {
     const detailsModalEl = document.getElementById('detailsModal');
-    const downloadModalEl = document.getElementById('downloadModal');
     const loginModalEl = document.getElementById('loginModal');
     const editModalEl = document.getElementById('editModal');
     if (detailsModalEl) detailsModalEl.style.display = 'none';
-    if (downloadModalEl) downloadModalEl.style.display = 'none';
     if (loginModalEl) loginModalEl.style.display = 'none';
     if (editModalEl) editModalEl.style.display = 'none';
-    const iframe = document.getElementById('modalIframe');
-    if (iframe) iframe.src = 'about:blank';
 }
 
 // ========== EVENT LISTENERS ==========
@@ -675,7 +660,7 @@ window.addEventListener('click', (e) => {
 loadModsFromStorage();
 checkAdminStatus();
 
-console.log("Admin login hidden: double-click title to login. Edit option available for admin users.");
+console.log("Admin login hidden: double-click title to login. Download links now open directly in new tab.");
 </script>
 </body>
 </html>

@@ -40,11 +40,24 @@ function escapeHtml(str) {
 }
 
 // Load mods from GitHub raw
+// Load mods from GitHub raw
 async function loadModsFromGitHub() {
     try {
-        const res = await fetch(RAW_URL + "?t=" + Date.now());
+        // no-store මගින් cache එක අයින් කරනවා
+        const res = await fetch(RAW_URL + "?t=" + Date.now(), {
+            cache: "no-store"
+        });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        let data = await res.json();
+        
+        // මුලින්ම text විදියට ගන්නවා
+        let textData = await res.text();
+        
+        // අතින් කොමාවක් වැරදීලා තිබුණොත් ඒක අයින් කරනවා (Trailing comma fix)
+        textData = textData.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
+        
+        // ඊට පස්සේ JSON එකට convert කරනවා
+        let data = JSON.parse(textData);
+        
         if (!Array.isArray(data)) data = [];
         allMods = data.map(mod => ({
             ...mod,
@@ -57,7 +70,6 @@ async function loadModsFromGitHub() {
         console.error(err);
     }
 }
-
 // Filter (search only)
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase().trim();
